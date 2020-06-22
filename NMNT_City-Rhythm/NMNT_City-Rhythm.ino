@@ -28,8 +28,8 @@ struct PIR {
   unsigned long interval = 0;
 };
 
-const int numSensor = 1;  // number of pairs
-PIR pir[numSensor];
+const int numSensorPairs = 1;
+PIR pir[numSensorPairs];
 
 int calibrationTime = 10; // seconds
 
@@ -46,7 +46,7 @@ void setup() {
   }
 
   int pinOffset = 6;
-  for (int i = 0; i < numSensor; i++) {
+  for (int i = 0; i < numSensorPairs; i++) {
     pir[i].left = i + pinOffset;
     pir[i].right = i + pinOffset + 1;
 
@@ -69,13 +69,13 @@ void setup() {
 
 
 void loop() {
-
+  
   // Read through all the sensors
-  for (int i = 0; i < numSensor; i++) {
+  for (int i = 0; i < numSensorPairs; i++) {
     boolean sensL = digitalRead(pir[i].left);
     boolean sensR = digitalRead(pir[i].right);
 
-    // We haven't detected anything yet
+    // If we haven't detected anything yet
     if (!pir[i].timerStart) {
       // If the left sensor detects a state from LOW to HIGH first
       if ((!pir[i].prevL && sensL) && (!pir[i].prevR && !sensR)) {
@@ -84,6 +84,7 @@ void loop() {
         pir[i].startT = millis();
         Serial.println("From left");
       }
+      
       // If the right sensor detects a state from LOW to HIGH first
       else if ((!pir[i].prevR && sensR) && (!pir[i].prevL && !sensL)) {
         pir[i].fromLeft = false;
@@ -97,7 +98,7 @@ void loop() {
     // See when the other sensor detects.
     else {
       // Left sensor was first.
-      // Stop timing when the right sensor detects.
+      // Stop timing when the right sensor is HIGH.
       if (pir[i].fromLeft) {
         if (sensR == HIGH) {
           pir[i].interval = millis() - pir[i].startT;
@@ -108,7 +109,7 @@ void loop() {
       }
 
       // Right sensor was first
-      // Stop timing when the left sensor detects.
+      // Stop timing when the left sensor is HIGH.
       else if (sensL == HIGH) {
         pir[i].interval = millis() - pir[i].startT;
         Serial.print("Arrived left at: ");
