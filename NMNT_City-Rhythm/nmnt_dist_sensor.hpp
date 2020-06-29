@@ -18,13 +18,11 @@ long distance2;
 
 // defines arrays to measure the average distance over time (used for calibration)
 const int numAvg = 100;
-const int numStep = 3;
+const int numStep = 10;
 unsigned long average1[numAvg];
 unsigned long average2[numAvg];
 unsigned long lastSteps1[numStep];
 unsigned long lastSteps2[numStep];
-//long margin1;
-//long margin2;
 
 // Timing between sensors
 boolean fromLeft = false;
@@ -34,6 +32,7 @@ unsigned long sensorInterval = 0;
 unsigned long debounceL = 0;
 unsigned long debounceR = 0;
 unsigned int bounceTime = 2000; // (ms)
+unsigned long timeOutMax = 10000;
 
 unsigned long range (byte trig, byte echo) {          // Calculates the distance in cm
 

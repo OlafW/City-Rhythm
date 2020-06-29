@@ -1,29 +1,25 @@
 #include <Adafruit_PWMServoDriver.h>
 #include "nmnt_dist_sensor.hpp"
+#include "nmnt_servo.hpp"
 
 Adafruit_PWMServoDriver servoShield = Adafruit_PWMServoDriver();
 
-// --------Servos-------//
-const int numServo = 1;
-const int PULSEMIN = 200;     // Minimum pulse: ~125
-const int PULSEMAX = 300;     // Maximum pulse: ~550
+NMNT_Servo servo[numServo];
 
-float servoFreq[numServo];     // Servo speed (Hz)
-float targetFreq[numServo];
-
-float minServoFreq = 0.2; // (Hz)
-float maxServoFreq = 4;   // (Hz)
-float freqSmooth = 0.995; // smoothing factor to lerp between freqs (0-1)
 
 void setup() {
   Serial.begin(9600);
+  randomSeed(analogRead(A0));
 
   servoShield.begin();
   servoShield.setPWMFreq(60);
 
   for (int i = 0; i < numServo; i++) {
-    servoFreq[i] = 2; // Initial frequency
-    targetFreq[i] = servoFreq[i];
+    servo[i].freq = 0.25; //0.5 + i * 0.1; // Initial frequency
+//    servo[i].freq = 0.25 + randomFloat(-0.1, 0.1);
+    servo[i].targetFreq = servo[i].freq;
+    servo[i].phase = i / float(numServo) * TWO_PI;
+
     servoShield.setPWM(i, 0, PULSEMIN);
   }
 
@@ -51,6 +47,12 @@ void loop() {
   boolean sensL = walkingBy(lastSteps2, average2);
   boolean sensR = walkingBy(lastSteps1, average1);
 
+  //  Serial.print("l ");
+  //  Serial.print(sensL);
+  //  Serial.print(" r ");
+  //  Serial.println(sensR);
+  //  return;
+
   // If we haven't detected anything yet
   if (!timerStart) {
     // If the left sensor detects a state from LOW to HIGH first
@@ -76,7 +78,12 @@ void loop() {
     // Left sensor was first.
     // Stop timing when the right sensor is HIGH.
     if (fromLeft) {
-      if (sensR == HIGH) {
+      // time-out
+      if (millis() - debounceL > timeOutMax) {
+        Serial.println("Took too long");
+        timerStart = false;
+      }
+      else if (sensR == HIGH) {
         // left debounce time is interval
         sensorInterval = millis() - debounceL;
         Serial.print("Arrived right at: ");
@@ -88,42 +95,59 @@ void loop() {
 
     // Right sensor was first
     // Stop timing when the left sensor is HIGH.
-    else if (sensL == HIGH) {
-      // right debounce time is interval
-      sensorInterval = millis() - debounceR;
-      Serial.print("Arrived left at: ");
-      Serial.println(sensorInterval);
-      timerStart = false;
-      debounceL = millis();
+    else {
+      // time-out
+      if (millis() - debounceR > timeOutMax) {
+        Serial.println("Took too long");
+        timerStart = false;
+      }
+      
+      else if (sensL == HIGH) {
+        // right debounce time is interval
+        sensorInterval = millis() - debounceR;
+        Serial.print("Arrived left at: ");
+        Serial.println(sensorInterval);
+        timerStart = false;
+        debounceL = millis();
+      }
     }
   }
+
 
   //-----Servos------//
 
-  // Set the servo speed corresponding to sonar interval
-  float sonarFreq = 1000.0 / (float)sensorInterval;
-  
-  if (sonarFreq > minServoFreq && sonarFreq < maxServoFreq) {
+  // Calculate servo speed from dist sensor interval
+  float distFreq = 1.0 / float((sensorInterval * 0.001) / stepsPerSeconds);
+
+  if (distFreq > minServoFreq && distFreq < maxServoFreq) {
     for (int i = 0; i < numServo; i++) {
-      targetFreq[i] = sonarFreq;
-      freqSmooth = floatMap(abs(servoFreq[i] - targetFreq[i]), 0, maxServoFreq-minServoFreq, 0.75, 0.99);
+      servo[i].freq = distFreq;// + randomFloat(-0.1, 0.1);
     }
+    freqSmooth = 0.995; // floatMap(abs(servoFreq[i] - targetFreq[i]), 0, maxServoFreq-minServoFreq, 0.95, 0.999);
   }
+  
 
   float t = millis() * 0.001; // time (s)
 
   for (int i = 0; i < numServo; i++) {
-    servoFreq[i] = lerp(servoFreq[i], targetFreq[i], freqSmooth);
+    //   servo[i].freq = lerp(servo[i].freq , servo[i].targetFreq , freqSmooth);
 
-    float phi = sin(TWO_PI * t * servoFreq[i]);
+    float phi = sin(TWO_PI * t * servo[i].freq);
 
-    int PWM = (int)floatMap(phi, -1.0, 1.0, PULSEMIN, PULSEMAX);
+    int PWM = (int)floatMap(phi, -1.0, 1.0, PULSEMIN[i], PULSEMAX[i] + servo[i].phase);
     servoShield.setPWM(i, 0, PWM);
   }
 }
 
 float floatMap(double x, double in_min, double in_max, double out_min, double out_max) {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+float randomFloat(float minR, float maxR) {
+  unsigned int res = 10000;
+  int randInt = random(res);
+  
+  return floatMap(randInt, 0, res-1, minR, maxR);
 }
 
 float lerp(float x, float y, float m) {
