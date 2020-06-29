@@ -132,7 +132,7 @@ void loop() {
   for (int i = 0; i < numServo; i++) {
     //   servo[i].freq = lerp(servo[i].freq , servo[i].targetFreq , freqSmooth);
 
-    float phi = sin(TWO_PI * t * servo[i].freq);
+    float phi = sin(TWO_PI * t * servo[i].freq + servo[i].phase);
 
     int PWM = (int)floatMap(phi, -1.0, 1.0, PULSEMIN[i], PULSEMAX[i] + servo[i].phase);
     servoShield.setPWM(i, 0, PWM);
