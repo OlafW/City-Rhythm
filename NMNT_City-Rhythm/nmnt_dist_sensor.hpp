@@ -64,7 +64,7 @@ unsigned long calculateAverage(long input[], int arraySize) {   // Calculates th
   return average;
 
 }
-//
+
 //unsigned long lastSteps(long input[]) {         // Calculates the average of the last three distances (could also have used the previous function, but C does not have an array.length() function and mweh)
 //
 //  long sum = 0;                                 // The reason for this function is that the sensor is sometimes faulty, but it's always only one number that's faulty.
