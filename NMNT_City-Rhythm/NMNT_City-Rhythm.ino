@@ -16,11 +16,16 @@ void setup() {
 
   for (int i = 0; i < numServo; i++) {
     servo[i].freq = 0.25; //0.5 + i * 0.1; // Initial frequency
-//    servo[i].freq = 0.25 + randomFloat(-0.1, 0.1);
-    servo[i].targetFreq = servo[i].freq;
-    servo[i].phase = i / float(numServo) * TWO_PI;
+    //    servo[i].freq = 0.25 + randomFloat(-0.05, 0.05);
+    servo[i].phase = i / float(numServo - 1) * PI;
 
     servoShield.setPWM(i, 0, PULSEMIN);
+  }
+
+  // MODE_AVG
+  for (int i = 0; i < numFreq; i++) {
+    servoFreqs[i] = servo[0].freq;// + randomFloat(-0.05, 0.05);
+    freqSum += servoFreqs[i];
   }
 
   pinMode(trigPin1, OUTPUT); // Sets the trigPin as an Output
@@ -101,7 +106,7 @@ void loop() {
         Serial.println("Took too long");
         timerStart = false;
       }
-      
+
       else if (sensL == HIGH) {
         // right debounce time is interval
         sensorInterval = millis() - debounceR;
@@ -119,20 +124,50 @@ void loop() {
   // Calculate servo speed from dist sensor interval
   float distFreq = 1.0 / float((sensorInterval * 0.001) / stepsPerSeconds);
 
+  // Set servo freq according to mode
   if (distFreq > minServoFreq && distFreq < maxServoFreq) {
-    for (int i = 0; i < numServo; i++) {
-      servo[i].freq = distFreq;// + randomFloat(-0.1, 0.1);
+
+    switch (MODE) {
+
+      case MODE_DIRECT:
+        for (int i = 0; i < numServo; i++) {
+          servo[i].freq = distFreq; // + randomFloat(-0.05, 0.05);
+        }
+        break;
+
+      case MODE_AVG:
+        // Get average freq of n sensor readings
+        freqSum -= servoFreqs[freqIndex];
+        servoFreqs[freqIndex] = distFreq;
+        freqSum += servoFreqs[freqIndex];
+        freqIndex = (freqIndex + 1) % numFreq;
+        freqAvg = freqSum / (float)numFreq;
+
+        for (int i = 0; i < numServo; i++) {
+          servo[i].freq = freqAvg; // + randomFloat(-0.05, 0.05);
+        }
+        break;
+
+      case MODE_ROUND:
+        servo[sensorCounter].freq = distFreq;
+        sensorCounter = (sensorCounter + 1) % numServo;
+        break;
+
+        // set phase direction;
+        for (int i = 0; i < numServo; i++) {
+          if (fromLeft) servo[i].phase = i / float(numServo - 1) * PI;
+          else servo[i].phase = (1.0 - i / float(numServo - 1)) * PI;
+        }
+        //    freqSmooth = 0.995; // floatMap(abs(servoFreq[i] - targetFreq[i]), 0, maxServoFreq-minServoFreq, 0.95, 0.999);
     }
-    freqSmooth = 0.995; // floatMap(abs(servoFreq[i] - targetFreq[i]), 0, maxServoFreq-minServoFreq, 0.95, 0.999);
   }
-  
 
   float t = millis() * 0.001; // time (s)
 
   for (int i = 0; i < numServo; i++) {
     //   servo[i].freq = lerp(servo[i].freq , servo[i].targetFreq , freqSmooth);
 
-    float phi = sin(TWO_PI * t * servo[i].freq + servo[i].phase);
+    float phi = cos(TWO_PI * t * servo[i].freq + servo[i].phase);
 
     int PWM = (int)floatMap(phi, -1.0, 1.0, PULSEMIN[i], PULSEMAX[i] + servo[i].phase);
     servoShield.setPWM(i, 0, PWM);
@@ -146,8 +181,8 @@ float floatMap(double x, double in_min, double in_max, double out_min, double ou
 float randomFloat(float minR, float maxR) {
   unsigned int res = 10000;
   int randInt = random(res);
-  
-  return floatMap(randInt, 0, res-1, minR, maxR);
+
+  return floatMap(randInt, 0, res - 1, minR, maxR);
 }
 
 float lerp(float x, float y, float m) {
