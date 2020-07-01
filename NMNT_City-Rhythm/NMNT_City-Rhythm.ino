@@ -124,7 +124,7 @@ void loop() {
   // Calculate servo speed from dist sensor interval
   float distFreq = 1.0 / float((sensorInterval * 0.001) / stepsPerSeconds);
 
-  // Set servo freq according to mode
+  // Set servo freqs according to mode
   if (distFreq > minServoFreq && distFreq < maxServoFreq) {
 
     switch (MODE) {
@@ -152,24 +152,24 @@ void loop() {
         servo[sensorCounter].freq = distFreq;
         sensorCounter = (sensorCounter + 1) % numServo;
         break;
-
-        // set phase direction;
-        for (int i = 0; i < numServo; i++) {
-          if (fromLeft) servo[i].phase = i / float(numServo - 1) * PI;
-          else servo[i].phase = (1.0 - i / float(numServo - 1)) * PI;
-        }
-        //    freqSmooth = 0.995; // floatMap(abs(servoFreq[i] - targetFreq[i]), 0, maxServoFreq-minServoFreq, 0.95, 0.999);
     }
+
+    // Set phase direction (in every mode);
+    for (int i = 0; i < numServo; i++) {
+      if (fromLeft) servo[i].phase = i / float(numServo-1) * PI;
+      else servo[i].phase =  (1.0 - i / float(numServo-1)) * PI;
+    }
+    //    freqSmooth = 0.995; // floatMap(abs(servoFreq[i] - targetFreq[i]), 0, maxServoFreq-minServoFreq, 0.95, 0.999);
   }
 
-  float t = millis() * 0.001; // time (s)
+  float time_s = millis() * 0.001;
 
   for (int i = 0; i < numServo; i++) {
     //   servo[i].freq = lerp(servo[i].freq , servo[i].targetFreq , freqSmooth);
 
-    float phi = cos(TWO_PI * t * servo[i].freq + servo[i].phase);
+    float phi = cos(TWO_PI * time_s * servo[i].freq + servo[i].phase);
 
-    int PWM = (int)floatMap(phi, -1.0, 1.0, PULSEMIN[i], PULSEMAX[i] + servo[i].phase);
+    int PWM = (int)floatMap(phi, -1.0, 1.0, PULSEMIN[i], PULSEMAX[i]);
     servoShield.setPWM(i, 0, PWM);
   }
 }

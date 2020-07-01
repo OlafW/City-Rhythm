@@ -29,10 +29,11 @@ boolean fromLeft = false;
 boolean timerStart = false;
 unsigned long sensorInterval = 0;
 
+// Debouncing
 unsigned long debounceL = 0;
 unsigned long debounceR = 0;
-unsigned int bounceTime = 2000; // (ms)
-unsigned long timeOutMax = 10000;
+unsigned int bounceTime = 2000;   // (ms)
+unsigned long timeOutMax = 10000; // (ms)
 
 unsigned long range (byte trig, byte echo) {          // Calculates the distance in cm
 

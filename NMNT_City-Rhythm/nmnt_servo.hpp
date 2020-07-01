@@ -21,23 +21,18 @@ float freqSmooth = 0.9995;      // smoothing factor to lerp between freqs (0-1)
 const int SensorDistance = 2; // (meters)
 const float stepsPerSeconds = 5.8 / float(SensorDistance * 2.0); // very crude
 
-
-// different behaviors
-const int MODE_DIRECT = 0;
-const int MODE_AVG = 1;
-const int MODE_ROUND = 2;
-
+// different modes of behavior
+enum Modes {MODE_DIRECT = 0, MODE_AVG, MODE_ROUND, NUM_MODES};
 int MODE = MODE_DIRECT;
 
 // MODE_AVG
 const int numFreq = 5;
 float servoFreqs[numFreq];
-unsigned int freqIndex = 0;
+int freqIndex = 0;
 float freqSum = 0;
 float freqAvg = 0;
 
 // MODE_ROUND
-unsigned int sensorCounter = 0;
-
+int sensorCounter = 0;
 
 #endif
