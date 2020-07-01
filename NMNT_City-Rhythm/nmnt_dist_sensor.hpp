@@ -5,9 +5,9 @@
 //#include <NewPing.h>
 
 // defines pins numbers
-const int trigPin1 = 9;       // the pin trig should be connected to 9
-const int echoPin1 = 10;      // the pin echo should be connected to 10
-const int trigPin2 = 5;
+const int trigPin1 = 9;       // the pin trig should be connected to 9  //right
+const int echoPin1 = 10;      // the pin echo should be connected to 10 
+const int trigPin2 = 5; // left
 const int echoPin2 = 6;
 
 // defines variables for distance measurement
@@ -28,6 +28,7 @@ unsigned long lastSteps2[numStep];
 boolean fromLeft = false;
 boolean timerStart = false;
 unsigned long sensorInterval = 0;
+bool setSensorValue = false;
 
 // Debouncing
 unsigned long debounceL = 0;

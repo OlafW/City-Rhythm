@@ -15,7 +15,7 @@ void setup() {
   servoShield.setPWMFreq(60);
 
   for (int i = 0; i < numServo; i++) {
-    servo[i].freq = 0.25 + randomFloat(-randFreq, randFreq); //0.5 + i * 0.1; // Initial frequency
+    servo[i].freq = 0.25;// + randomFloat(-randFreq, randFreq); // Initial frequency
     servo[i].phase = i / float(numServo - 1) * PI;
 
     servoShield.setPWM(i, 0, PULSEMIN);
@@ -38,11 +38,13 @@ void loop() {
   float cm1, cm2;                         // Used to save the distance in cm in every frame
   delayMicroseconds(5);
 
+  // right
   cm1 = range(trigPin1, echoPin1);        // Calculates the current distance in cm (see range function)
   delayMicroseconds(10);
   average1[0] = cm1;                      // The first item of the array is the current distance
   lastSteps1[0] = cm1;
 
+  // left
   cm2 = range(trigPin2, echoPin2);
   delayMicroseconds(10);
   average2[0] = cm2;
@@ -94,6 +96,7 @@ void loop() {
         Serial.println(sensorInterval);
         timerStart = false;
         debounceR = millis();
+        setSensorValue = false;
       }
     }
 
@@ -113,6 +116,7 @@ void loop() {
         Serial.println(sensorInterval);
         timerStart = false;
         debounceL = millis();
+        setSensorValue = false;
       }
     }
   }
@@ -125,40 +129,44 @@ void loop() {
 
   // Set servo freqs according to mode
   if (distFreq > minServoFreq && distFreq < maxServoFreq) {
+    if (!setSensorValue) {
+      setSensorValue = true;
+      
+      switch (MODE) {
 
-    switch (MODE) {
+        case MODE_DIRECT:
+          for (int i = 0; i < numServo; i++) {
+            servo[i].freq = distFreq + randomFloat(-randFreq, randFreq);
+          }
+          break;
 
-      case MODE_DIRECT:
-        for (int i = 0; i < numServo; i++) {
-          servo[i].freq = distFreq + randomFloat(-randFreq, randFreq);
-        }
-        break;
+        case MODE_AVG:
+          // Get average freq of n sensor readings
+          freqSum -= servoFreqs[freqIndex];
+          servoFreqs[freqIndex] = distFreq;
+          freqSum += servoFreqs[freqIndex];
+          freqIndex = (freqIndex + 1) % numFreq;
+          freqAvg = freqSum / (float)numFreq;
 
-      case MODE_AVG:
-        // Get average freq of n sensor readings
-        freqSum -= servoFreqs[freqIndex];
-        servoFreqs[freqIndex] = distFreq;
-        freqSum += servoFreqs[freqIndex];
-        freqIndex = (freqIndex + 1) % numFreq;
-        freqAvg = freqSum / (float)numFreq;
+          for (int i = 0; i < numServo; i++) {
+            servo[i].freq = freqAvg + randomFloat(-randFreq, randFreq);
+          }
+          break;
 
-        for (int i = 0; i < numServo; i++) {
-          servo[i].freq = freqAvg + randomFloat(-randFreq, randFreq);
-        }
-        break;
+        case MODE_ROUND:
+          servo[sensorCounter].freq = distFreq;
+          sensorCounter = (sensorCounter + 1) % numServo;
+          servo[sensorCounter].freq = distFreq;
+          break;
+      }
 
-      case MODE_ROUND:
-        servo[sensorCounter].freq = distFreq;
-        sensorCounter = (sensorCounter + 1) % numServo;
-        break;
+      // Set phase direction (in every mode);
+      for (int i = 0; i < numServo; i++) {
+        if (fromLeft) servo[i].phase = i / float(numServo - 1) * PI;
+        else servo[i].phase =  (1.0 - i / float(numServo - 1)) * PI;
+      }
+      //    freqSmooth = 0.995; // floatMap(abs(servoFreq[i] - targetFreq[i]), 0, maxServoFreq-minServoFreq, 0.95, 0.999);
     }
-
-    // Set phase direction (in every mode);
-    for (int i = 0; i < numServo; i++) {
-      if (fromLeft) servo[i].phase = i / float(numServo-1) * PI;
-      else servo[i].phase =  (1.0 - i / float(numServo-1)) * PI;
-    }
-    //    freqSmooth = 0.995; // floatMap(abs(servoFreq[i] - targetFreq[i]), 0, maxServoFreq-minServoFreq, 0.95, 0.999);
   }
 
   float time_s = millis() * 0.001;
