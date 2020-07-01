@@ -15,7 +15,7 @@ void setup() {
   servoShield.setPWMFreq(60);
 
   for (int i = 0; i < numServo; i++) {
-    servo[i].freq = 0.25 + randomFloat(-randFreqAmnt, randFreqAmnt); //0.5 + i * 0.1; // Initial frequency
+    servo[i].freq = 0.25 + randomFloat(-randFreq, randFreq); //0.5 + i * 0.1; // Initial frequency
     servo[i].phase = i / float(numServo - 1) * PI;
 
     servoShield.setPWM(i, 0, PULSEMIN);
@@ -23,7 +23,7 @@ void setup() {
 
   // MODE_AVG
   for (int i = 0; i < numFreq; i++) {
-    servoFreqs[i] = servo[0].freq;// + randomFloat(-0.05, 0.05);
+    servoFreqs[i] = servo[0].freq;// + randomFloat(-randFreq, randFreq);
     freqSum += servoFreqs[i];
   }
 
@@ -130,7 +130,7 @@ void loop() {
 
       case MODE_DIRECT:
         for (int i = 0; i < numServo; i++) {
-          servo[i].freq = distFreq + randomFloat(-randFreqAmnt, randFreqAmnt);
+          servo[i].freq = distFreq + randomFloat(-randFreq, randFreq);
         }
         break;
 
@@ -143,7 +143,7 @@ void loop() {
         freqAvg = freqSum / (float)numFreq;
 
         for (int i = 0; i < numServo; i++) {
-          servo[i].freq = freqAvg + randomFloat(-randFreqAmnt, randFreqAmnt);
+          servo[i].freq = freqAvg + randomFloat(-randFreq, randFreq);
         }
         break;
 

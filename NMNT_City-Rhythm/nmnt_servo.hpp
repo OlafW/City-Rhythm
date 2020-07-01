@@ -11,15 +11,15 @@ struct NMNT_Servo {
 };
 
 const int numServo = 4;
-const int PULSEMIN[] = {215, 200, 250, 230};       
-const int PULSEMAX[] = {350, 280, 300, 315};
+const int PULSEMIN[numServo] = {215, 200, 250, 230};       
+const int PULSEMAX[numServo] = {350, 280, 300, 315};
 
 const float minServoFreq = 0.2;   // (Hz)
 const float maxServoFreq = 4.0;   // (Hz)
-const float randFreqAmnt = 0.05; // (rand freq deviation, 0 for no random)
+const float randFreq = 0;//0.05;      // (random freq deviation, 0 for no random)
 
-const int SensorDistance = 2; // (meters)
-const float stepsPerSeconds = 5.8 / float(SensorDistance * 2.0); // very crude
+const int sensorDistance = 2; // (meters)
+const float stepsPerSeconds = 5.8 / float(sensorDistance * 2.0); // very crude
 
 // different modes of behavior
 enum Modes {MODE_DIRECT = 0, MODE_AVG, MODE_ROUND, NUM_MODES};
