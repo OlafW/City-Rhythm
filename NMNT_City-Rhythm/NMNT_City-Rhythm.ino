@@ -160,7 +160,6 @@ void loop() {
           break;
       }
 
-
       // Set phase direction (in every mode);
       for (int i = 0; i < numServo; i++) {
         if (fromLeft) servo[i].phase = i / float(numServo - 1) * PI;
