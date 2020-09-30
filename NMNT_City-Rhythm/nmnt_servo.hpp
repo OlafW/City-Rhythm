@@ -22,11 +22,10 @@ const int sensorDistance = 2; // (meters)
 const float stepsPerSeconds = 5.8 / float(sensorDistance * 2.0); // very crude
 
 // different modes of behavior
-const int MODE_DIRECT = 0;
-const int MODE_AVG = 1;
-const int MODE_ROUND = 2;
+enum MODES {MODE_DIRECT=0, MODE_AVG, MODE_ROUND, MODE_SLEEP};
 
-int MODE = MODE_DIRECT;
+int INIT_MODE = MODE_DIRECT;
+int MODE = INIT_MODE;
 
 // MODE_AVG
 const int numFreq = 5;

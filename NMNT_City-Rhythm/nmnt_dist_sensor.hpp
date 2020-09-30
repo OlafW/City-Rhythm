@@ -5,9 +5,9 @@
 //#include <NewPing.h>
 
 // defines pins numbers
-const int trigPin1 = 9;       // the pin trig should be connected to 9  //right
-const int echoPin1 = 10;      // the pin echo should be connected to 10 
-const int trigPin2 = 5; // left
+const int trigPin1 = 9;  // right sensor (9, 10)      the pin trig should be connected to 9  
+const int echoPin1 = 10;                           // the pin echo should be connected to 10 
+const int trigPin2 = 5; // left sensor (5, 6)
 const int echoPin2 = 6;
 
 // defines variables for distance measurement
@@ -30,11 +30,15 @@ boolean timerStart = false;
 unsigned long sensorInterval = 0;
 bool setSensorValue = false;
 
+
+const unsigned long sensorTimeOut = 10000;      // Max time until sensor restarts timing (10 s)
+const unsigned long systemSleep = 120000;  // Max time of no activity until servos shut off (2 min)
+
 // Debouncing
 unsigned long debounceL = 0;
 unsigned long debounceR = 0;
-unsigned int bounceTime = 2000;   // (ms)
-unsigned long timeOutMax = 10000; // (ms)
+const unsigned int bounceTime = 2000; // (ms)
+
 
 unsigned long range (byte trig, byte echo) {          // Calculates the distance in cm
 

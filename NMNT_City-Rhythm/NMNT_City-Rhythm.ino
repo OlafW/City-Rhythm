@@ -11,13 +11,19 @@ void setup() {
   Serial.begin(9600);
   randomSeed(analogRead(A0));
 
+  // Sensors
+  pinMode(trigPin1, OUTPUT); // Sets the trigPin as an Output
+  pinMode(echoPin1, INPUT); // Sets the echoPin as an Input
+  pinMode(trigPin2, OUTPUT); // Sets the trigPin as an Output
+  pinMode(echoPin2, INPUT); // Sets the echoPin as an Input
+
+  // Servos
   servoShield.begin();
   servoShield.setPWMFreq(60);
 
   for (int i = 0; i < numServo; i++) {
-    servo[i].freq = 0.25;// + randomFloat(-randFreq, randFreq); // Initial frequency
+    servo[i].freq = minServoFreq; // + randomFloat(-randFreq, randFreq); // Initial frequency
     servo[i].phase = i / float(numServo - 1) * PI;
-
     servoShield.setPWM(i, 0, PULSEMIN);
   }
 
@@ -26,11 +32,6 @@ void setup() {
     servoFreqs[i] = servo[0].freq;// + randomFloat(-randFreq, randFreq);
     freqSum += servoFreqs[i];
   }
-
-  pinMode(trigPin1, OUTPUT); // Sets the trigPin as an Output
-  pinMode(echoPin1, INPUT); // Sets the echoPin as an Input
-  pinMode(trigPin2, OUTPUT); // Sets the trigPin as an Output
-  pinMode(echoPin2, INPUT); // Sets the echoPin as an Input
 }
 
 
@@ -85,7 +86,7 @@ void loop() {
     // Stop timing when the right sensor is HIGH.
     if (fromLeft) {
       // time-out
-      if (millis() - debounceL > timeOutMax) {
+      if (millis() - debounceL > sensorTimeOut) {
         Serial.println("Took too long");
         timerStart = false;
       }
@@ -96,7 +97,7 @@ void loop() {
         Serial.println(sensorInterval);
         timerStart = false;
         debounceR = millis();
-        setSensorValue = false;
+        setSensorValue = true;
       }
     }
 
@@ -104,7 +105,7 @@ void loop() {
     // Stop timing when the left sensor is HIGH.
     else {
       // time-out
-      if (millis() - debounceR > timeOutMax) {
+      if (millis() - debounceR > sensorTimeOut) {
         Serial.println("Took too long");
         timerStart = false;
       }
@@ -116,7 +117,7 @@ void loop() {
         Serial.println(sensorInterval);
         timerStart = false;
         debounceL = millis();
-        setSensorValue = false;
+        setSensorValue = true;
       }
     }
   }
@@ -124,14 +125,17 @@ void loop() {
 
   //-----Servos------//
 
-  // Calculate servo speed from dist sensor interval
-  float distFreq = 1.0 / float((sensorInterval * 0.001) / stepsPerSeconds);
 
-  // Set servo freqs according to mode
-  if (distFreq > minServoFreq && distFreq < maxServoFreq) {
-    if (!setSensorValue) {
-      setSensorValue = true;
-      
+  // if new sensor value was set
+  if (setSensorValue) {
+    setSensorValue = false;
+
+    // Calculate servo speed from dist sensor interval
+    float distFreq = 1.0 / float((sensorInterval * 0.001) / stepsPerSeconds);
+
+    if (distFreq >= minServoFreq && distFreq <= maxServoFreq) {
+
+      // Set servo freqs according to mode
       switch (MODE) {
 
         case MODE_DIRECT:
@@ -167,6 +171,21 @@ void loop() {
       }
       //    freqSmooth = 0.995; // floatMap(abs(servoFreq[i] - targetFreq[i]), 0, maxServoFreq-minServoFreq, 0.95, 0.999);
     }
+  }
+
+  // Check if there is inactivity for more then systemSleep time
+  // If so, set servos to minfreq
+  if (millis() - debounceL > systemSleep || millis() - debounceR > systemSleep) {
+    if (MODE != MODE_SLEEP) {
+      Serial.println("No activity for too long, sleeping");
+      MODE = MODE_SLEEP;
+      for (int i = 0; i < numServo; i++) {
+        servo[i].freq = minServoFreq + randomFloat(-0.01, 0.01);
+      }
+    }
+  } else if (MODE == MODE_SLEEP) {
+    Serial.print("Out of sleep mode");
+    MODE = INIT_MODE;
   }
 
   float time_s = millis() * 0.001;
