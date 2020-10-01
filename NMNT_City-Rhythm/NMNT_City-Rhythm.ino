@@ -17,13 +17,13 @@ void setup() {
   pinMode(trigPin2, OUTPUT); // Sets the trigPin as an Output
   pinMode(echoPin2, INPUT); // Sets the echoPin as an Input
 
-  // Servos
+  // initialize Servos
   servoShield.begin();
   servoShield.setPWMFreq(60);
 
   for (int i = 0; i < numServo; i++) {
-    servo[i].freq = minServoFreq; // + randomFloat(-randFreq, randFreq); // Initial frequency
-    servo[i].phase = i / float(numServo - 1) * PI;
+    servo[i].freq = minServoFreq;     // + randomFloat(-randFreq, randFreq); // Initial frequency
+    servo[i].phase = random(TWO_PI);  //i / float(numServo - 1) * PI;
     servoShield.setPWM(i, 0, PULSEMIN);
   }
 
@@ -135,6 +135,13 @@ void loop() {
 
     if (distFreq >= minServoFreq && distFreq <= maxServoFreq) {
 
+      // if in sleepmode, go to mode round
+      if (MODE == MODE_SLEEP) {
+        sleepTime = millis();
+        MODE = MODE_ROUND;
+        Serial.print("Out of sleep mode");
+      }
+
       // Set servo freqs according to mode
       switch (MODE) {
 
@@ -144,24 +151,29 @@ void loop() {
           }
           break;
 
-        case MODE_AVG:
-          // Get average freq of n sensor readings
-          freqSum -= servoFreqs[freqIndex];
-          servoFreqs[freqIndex] = distFreq;
-          freqSum += servoFreqs[freqIndex];
-          freqIndex = (freqIndex + 1) % numFreq;
-          freqAvg = freqSum / (float)numFreq;
-
-          for (int i = 0; i < numServo; i++) {
-            servo[i].freq = freqAvg + randomFloat(-randFreq, randFreq);
+        case MODE_ROUND:
+          servo[sensorCounter].freq = distFreq;
+          sensorCounter++;
+          
+          // go to direct mode after all servos have been set
+          if (sensorCounter >= numServo) {
+            sensorCounter = 0;
+            MODE = MODE_DIRECT;
           }
           break;
 
-        case MODE_ROUND:
-          servo[sensorCounter].freq = distFreq;
-          sensorCounter = (sensorCounter + 1) % numServo;
-          servo[sensorCounter].freq = distFreq;
-          break;
+//        case MODE_AVG:
+//          // Get average freq of n sensor readings
+//          freqSum -= servoFreqs[freqIndex];
+//          servoFreqs[freqIndex] = distFreq;
+//          freqSum += servoFreqs[freqIndex];
+//          freqIndex = (freqIndex + 1) % numFreq;
+//          freqAvg = freqSum / (float)numFreq;
+//
+//          for (int i = 0; i < numServo; i++) {
+//            servo[i].freq = freqAvg + randomFloat(-randFreq, randFreq);
+//          }
+//          break;
       }
 
       // Set phase direction (in every mode);
@@ -169,23 +181,20 @@ void loop() {
         if (fromLeft) servo[i].phase = i / float(numServo - 1) * PI;
         else servo[i].phase =  (1.0 - i / float(numServo - 1)) * PI;
       }
-      //    freqSmooth = 0.995; // floatMap(abs(servoFreq[i] - targetFreq[i]), 0, maxServoFreq-minServoFreq, 0.95, 0.999);
     }
   }
 
   // Check if there is inactivity for more then systemSleep time
   // If so, set servos to minfreq
-  if (millis() - debounceL > systemSleep || millis() - debounceR > systemSleep) {
+  if (millis() - sleepTime > systemSleep) {
+
     if (MODE != MODE_SLEEP) {
       Serial.println("No activity for too long, sleeping");
       MODE = MODE_SLEEP;
       for (int i = 0; i < numServo; i++) {
-        servo[i].freq = minServoFreq + randomFloat(-0.01, 0.01);
+        servo[i].freq = minServoFreq + randomFloat(-0.1, 0.05);
       }
     }
-  } else if (MODE == MODE_SLEEP) {
-    Serial.print("Out of sleep mode");
-    MODE = INIT_MODE;
   }
 
   float time_s = millis() * 0.001;

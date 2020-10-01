@@ -2,7 +2,6 @@
 #define _NMNT_DIST_SENSOR_HPP_
 
 #include "Arduino.h"
-//#include <NewPing.h>
 
 // defines pins numbers
 const int trigPin1 = 9;  // right sensor (9, 10)      the pin trig should be connected to 9  
@@ -17,7 +16,7 @@ long duration2;
 long distance2;
 
 // defines arrays to measure the average distance over time (used for calibration)
-const int numAvg = 100;
+const int numAvg = 50; // 100
 const int numStep = 10;
 unsigned long average1[numAvg];
 unsigned long average2[numAvg];
@@ -30,9 +29,9 @@ boolean timerStart = false;
 unsigned long sensorInterval = 0;
 bool setSensorValue = false;
 
-
-const unsigned long sensorTimeOut = 10000;      // Max time until sensor restarts timing (10 s)
-const unsigned long systemSleep = 120000;  // Max time of no activity until servos shut off (2 min)
+const unsigned long sensorTimeOut = 10000;  // Max time until sensor restarts timing (10 s)
+const unsigned long systemSleep = 120000;   // Max time of no activity until servos shut off (2 min)
+unsigned long sleepTime = 0;
 
 // Debouncing
 unsigned long debounceL = 0;
