@@ -23,9 +23,7 @@ const float stepsPerSeconds = 5.8 / float(sensorDistance * 2.0); // very crude
 
 // Different modes of behavior
 enum MODES {MODE_DIRECT=0, MODE_ROUND, MODE_AVG, MODE_SLEEP};
-
-int INIT_MODE = MODE_DIRECT;
-int MODE = INIT_MODE;
+int MODE = MODE_SLEEP; //MODE_DIRECT;                               // Start in sleep mode
 
 // MODE_ROUND
 int sensorCounter = 0;

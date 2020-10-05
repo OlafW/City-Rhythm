@@ -32,27 +32,44 @@ void setup() {
     servoFreqs[i] = servo[0].freq;// + randomFloat(-randFreq, randFreq);
     freqSum += servoFreqs[i];
   }
+  Serial.println("System start!");
 }
 
 
 void loop() {
-  float cm1, cm2;                         // Used to save the distance in cm in every frame
+  float cm1 = 0;
+  float cm2 = 0;                         // Used to save the distance in cm in every frame
   delayMicroseconds(5);
 
   // right
-  cm1 = range(trigPin1, echoPin1);        // Calculates the current distance in cm (see range function)
-  delayMicroseconds(10);
-  average1[0] = cm1;                      // The first item of the array is the current distance
-  lastSteps1[0] = cm1;
+  //  cm1 = range(trigPin1, echoPin1);    // Calculates the current distance in cm (see range function)
+  //  delayMicroseconds(10);
+  //  average1[0] = cm1;                      // The first item of the array is the current distance
+  //  lastSteps1[0] = cm1;
+  //
+  //  // left
+  //  cm2 = range(trigPin2, echoPin2);
+  //  delayMicroseconds(10);
+  //  average2[0] = cm2;
+  //  lastSteps2[0] = cm2;
+  //
+  //  boolean sensL = walkingBy(lastSteps2, average2);
+  //  boolean sensR = walkingBy(lastSteps1, average1);
 
-  // left
-  cm2 = range(trigPin2, echoPin2);
-  delayMicroseconds(10);
-  average2[0] = cm2;
-  lastSteps2[0] = cm2;
+  // debug
+  boolean sensL = false;
+  boolean sensR = false;
+  if (Serial.available() > 0) {
+    char a = (char)Serial.read();
+    //      Serial.write(a);
 
-  boolean sensL = walkingBy(lastSteps2, average2);
-  boolean sensR = walkingBy(lastSteps1, average1);
+    if (a == 'l') {
+      sensL = true;
+    }
+    else if (a == 'r') {
+      sensR = true;
+    }
+  }
 
   //  Serial.print("l ");
   //  Serial.print(sensL);
@@ -134,12 +151,13 @@ void loop() {
     float distFreq = 1.0 / float((sensorInterval * 0.001) / stepsPerSeconds);
 
     if (distFreq >= minServoFreq && distFreq <= maxServoFreq) {
+      sleepTime = millis();
 
-      // if in sleepmode, go to mode round
+      // if in sleepmode, go to different mode
       if (MODE == MODE_SLEEP) {
-        sleepTime = millis();
+//        MODE = MODE_DIRECT;
         MODE = MODE_ROUND;
-        Serial.print("Out of sleep mode");
+        Serial.println("Out of sleep mode");
       }
 
       // Set servo freqs according to mode
@@ -154,7 +172,7 @@ void loop() {
         case MODE_ROUND:
           servo[sensorCounter].freq = distFreq;
           sensorCounter++;
-          
+
           // go to direct mode after all servos have been set
           if (sensorCounter >= numServo) {
             sensorCounter = 0;
@@ -162,18 +180,18 @@ void loop() {
           }
           break;
 
-//        case MODE_AVG:
-//          // Get average freq of n sensor readings
-//          freqSum -= servoFreqs[freqIndex];
-//          servoFreqs[freqIndex] = distFreq;
-//          freqSum += servoFreqs[freqIndex];
-//          freqIndex = (freqIndex + 1) % numFreq;
-//          freqAvg = freqSum / (float)numFreq;
-//
-//          for (int i = 0; i < numServo; i++) {
-//            servo[i].freq = freqAvg + randomFloat(-randFreq, randFreq);
-//          }
-//          break;
+          //        case MODE_AVG:
+          //          // Get average freq of n sensor readings
+          //          freqSum -= servoFreqs[freqIndex];
+          //          servoFreqs[freqIndex] = distFreq;
+          //          freqSum += servoFreqs[freqIndex];
+          //          freqIndex = (freqIndex + 1) % numFreq;
+          //          freqAvg = freqSum / (float)numFreq;
+          //
+          //          for (int i = 0; i < numServo; i++) {
+          //            servo[i].freq = freqAvg + randomFloat(-randFreq, randFreq);
+          //          }
+          //          break;
       }
 
       // Set phase direction (in every mode);
@@ -187,12 +205,11 @@ void loop() {
   // Check if there is inactivity for more then systemSleep time
   // If so, set servos to minfreq
   if (millis() - sleepTime > systemSleep) {
-
     if (MODE != MODE_SLEEP) {
       Serial.println("No activity for too long, sleeping");
       MODE = MODE_SLEEP;
       for (int i = 0; i < numServo; i++) {
-        servo[i].freq = minServoFreq + randomFloat(-0.1, 0.05);
+        servo[i].freq = minServoFreq + randomFloat(-0.05, 0.05);
       }
     }
   }

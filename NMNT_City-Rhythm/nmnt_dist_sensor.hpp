@@ -38,7 +38,6 @@ unsigned long debounceL = 0;
 unsigned long debounceR = 0;
 const unsigned int bounceTime = 2000; // (ms)
 
-
 unsigned long range (byte trig, byte echo) {          // Calculates the distance in cm
 
   digitalWrite(trig, LOW);
