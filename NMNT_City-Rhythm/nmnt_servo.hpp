@@ -8,6 +8,7 @@
 struct NMNT_Servo {
   float freq; // (Hz)
   float phase;
+//  float targetFreq;
 };
 
 const int numServo = 4;

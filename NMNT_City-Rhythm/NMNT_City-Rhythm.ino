@@ -23,7 +23,7 @@ void setup() {
 
   for (int i = 0; i < numServo; i++) {
     servo[i].freq = minServoFreq;     // + randomFloat(-randFreq, randFreq); // Initial frequency
-    servo[i].phase = random(TWO_PI);  //i / float(numServo - 1) * PI;
+    servo[i].phase = random(HALF_PI);  //i / float(numServo - 1) * HALF_PI;
     servoShield.setPWM(i, 0, PULSEMIN);
   }
 
@@ -196,8 +196,8 @@ void loop() {
 
       // Set phase direction (in every mode);
       for (int i = 0; i < numServo; i++) {
-        if (fromLeft) servo[i].phase = i / float(numServo - 1) * PI;
-        else servo[i].phase =  (1.0 - i / float(numServo - 1)) * PI;
+        if (fromLeft) servo[i].phase = i / float(numServo - 1) * HALF_PI;
+        else servo[i].phase =   (1.0 - i / float(numServo - 1)) * HALF_PI;
       }
     }
   }
@@ -217,7 +217,7 @@ void loop() {
   float time_s = millis() * 0.001;
 
   for (int i = 0; i < numServo; i++) {
-    //   servo[i].freq = lerp(servo[i].freq , servo[i].targetFreq , freqSmooth);
+//       servo[i].freq = lerp(servo[i].freq , servo[i].targetFreq , freqSmooth);
 
     float phi = cos(TWO_PI * time_s * servo[i].freq + servo[i].phase);
 
