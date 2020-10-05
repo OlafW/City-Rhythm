@@ -42,34 +42,34 @@ void loop() {
   delayMicroseconds(5);
 
   // right
-    cm1 = range(trigPin1, echoPin1);    // Calculates the current distance in cm (see range function)
-    delayMicroseconds(10);
-    average1[0] = cm1;                      // The first item of the array is the current distance
-    lastSteps1[0] = cm1;
-  
-    // left
-    cm2 = range(trigPin2, echoPin2);
-    delayMicroseconds(10);
-    average2[0] = cm2;
-    lastSteps2[0] = cm2;
-  
-    boolean sensL = walkingBy(lastSteps2, average2);
-    boolean sensR = walkingBy(lastSteps1, average1);
+  cm1 = range(trigPin1, echoPin1);    // Calculates the current distance in cm (see range function)
+  delayMicroseconds(10);
+  average1[0] = cm1;                      // The first item of the array is the current distance
+  lastSteps1[0] = cm1;
 
-//   debug
-//  boolean sensL = false;
-//  boolean sensR = false;
-//  if (Serial.available() > 0) {
-//    char a = (char)Serial.read();
-//    //      Serial.write(a);
-//
-//    if (a == 'l') {
-//      sensL = true;
-//    }
-//    else if (a == 'r') {
-//      sensR = true;
-//    }
-//  }
+  // left
+  cm2 = range(trigPin2, echoPin2);
+  delayMicroseconds(10);
+  average2[0] = cm2;
+  lastSteps2[0] = cm2;
+
+  boolean sensL = walkingBy(lastSteps2, average2);
+  boolean sensR = walkingBy(lastSteps1, average1);
+
+  //   debug
+  //  boolean sensL = false;
+  //  boolean sensR = false;
+  //  if (Serial.available() > 0) {
+  //    char a = (char)Serial.read();
+  //    //      Serial.write(a);
+  //
+  //    if (a == 'l') {
+  //      sensL = true;
+  //    }
+  //    else if (a == 'r') {
+  //      sensR = true;
+  //    }
+  //  }
 
   //  Serial.print("l ");
   //  Serial.print(sensL);
@@ -155,7 +155,7 @@ void loop() {
 
       // if prev in sleepmode, go to different mode
       if (MODE == MODE_SLEEP) {
-//        MODE = MODE_DIRECT;
+        //        MODE = MODE_DIRECT;
         MODE = MODE_ROUND;
         Serial.println("Out of sleep mode");
       }
