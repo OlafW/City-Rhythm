@@ -57,19 +57,19 @@ void loop() {
   boolean sensR = walkingBy(lastSteps1, average1);
 
   //   debug
-  //  boolean sensL = false;
-  //  boolean sensR = false;
-  //  if (Serial.available() > 0) {
-  //    char a = (char)Serial.read();
-  //    //      Serial.write(a);
-  //
-  //    if (a == 'l') {
-  //      sensL = true;
-  //    }
-  //    else if (a == 'r') {
-  //      sensR = true;
-  //    }
-  //  }
+//  boolean sensL = false;
+//  boolean sensR = false;
+//  if (Serial.available() > 0) {
+//    char a = (char)Serial.read();
+//    //      Serial.write(a);
+//
+//    if (a == 'l') {
+//      sensL = true;
+//    }
+//    else if (a == 'r') {
+//      sensR = true;
+//    }
+//  }
 
   //  Serial.print("l ");
   //  Serial.print(sensL);
