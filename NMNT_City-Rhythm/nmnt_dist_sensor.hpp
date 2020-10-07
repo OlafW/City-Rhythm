@@ -29,8 +29,8 @@ boolean timerStart = false;
 unsigned long sensorInterval = 0;
 bool setSensorValue = false;
 
-const unsigned long sensorTimeOut = 10000;  // Max time until sensor restarts timing (10 s)
-const unsigned long systemSleep = 90000;   // Max time of no activity until servos shut off (90 s)
+const unsigned long sensorTimeOut = 8000;  // Max time until sensor restarts timing (8 s)
+const unsigned long systemSleep = 20000;   // Max time of no activity until servos shut off (20 s)
 unsigned long sleepTime = 0;
 
 // Debouncing

@@ -56,6 +56,7 @@ void loop() {
   boolean sensL = walkingBy(lastSteps2, average2);
   boolean sensR = walkingBy(lastSteps1, average1);
 
+
   //   debug
 //  boolean sensL = false;
 //  boolean sensR = false;
@@ -70,12 +71,6 @@ void loop() {
 //      sensR = true;
 //    }
 //  }
-
-  //  Serial.print("l ");
-  //  Serial.print(sensL);
-  //  Serial.print(" r ");
-  //  Serial.println(sensR);
-  //  return;
 
   // If we haven't detected anything yet
   if (!timerStart) {
@@ -154,10 +149,14 @@ void loop() {
       sleepTime = millis(); // reset sleep timer
 
       // if prev in sleepmode, go to different mode
-      if (MODE == MODE_SLEEP) {
-        //        MODE = MODE_DIRECT;
-        MODE = MODE_ROUND;
-        Serial.println("Out of sleep mode");
+      if (MODE == MODE_SLEEP) {      
+        float rm = randomFloat(0, 1);
+        
+        if (rm > 0.5) MODE = MODE_DIRECT;
+        else MODE = MODE_ROUND;
+
+        Serial.print("Out of sleepmode. New mode = ");
+        Serial.println(MODE);
       }
 
       // Set servo freqs according to mode

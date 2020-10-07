@@ -12,8 +12,8 @@ struct NMNT_Servo {
 };
 
 const int numServo = 4;
-const int PULSEMIN[numServo] = {215, 200, 250, 230};       
-const int PULSEMAX[numServo] = {350, 280, 300, 315};
+const int PULSEMIN[numServo] = {130, 200, 250, 230};       
+const int PULSEMAX[numServo] = {190, 280, 300, 315};
 
 const float minServoFreq = 0.2;     // (Hz)
 const float maxServoFreq = 4.0;     // (Hz)
